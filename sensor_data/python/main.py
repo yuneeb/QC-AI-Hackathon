@@ -35,15 +35,15 @@ def sensor_polling_loop():
         temperature = Bridge.call("get_temperature")
         distance = Bridge.call("get_distance")
         
-        print("--- Modulino Telemetry Received ---")
-        print(f"Temperature: {temperature} C")
-        print(f"Distance   : {distance} mm")
+        #print("--- Modulino Telemetry Received ---")
+        #print(f"Temperature: {temperature} C")
+        #print(f"Distance   : {distance} mm")
 
         # Update the global telemetry dictionary
         latest_telemetry = {
             "temperature": temperature,
             "distance": distance,
-            "timestamp": time.time(),
+            "timestamp": date.now(),
         }
         
     except Exception as e:
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     arduino_thread = threading.Thread(target=start_arduino_app, daemon=True)
     arduino_thread.start()
 
-    PORT = 8000
+    PORT = 9000
     server_address = ('', PORT)
     httpd = HTTPServer(server_address, SensorHTTPRequestHandler)
     print(f"Serving sensor data on port {PORT} at http://localhost:{PORT}/data ...")
