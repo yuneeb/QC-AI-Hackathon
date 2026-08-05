@@ -1,5 +1,5 @@
-"""Client utilities for the context service."""
+"""Client utilities for JSON APIs."""
 
-from .context_reader import ContextFetchError, fetch_context
+from .context_reader import APIFetchError, fetch_api_data
 
-__all__ = ["ContextFetchError", "fetch_context"]
+__all__ = ["APIFetchError", "fetch_api_data"]
