@@ -1,5 +1,8 @@
 name: sensor_data
 description: ""
-ports: []
+ports: [9000]
 bricks: []
-icon: 😀
+icon: 🍆
+network:
+  forwarded_ports:
+    - 9000/tcp
