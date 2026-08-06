@@ -1,0 +1,69 @@
+{
+    "collection_interval_ms": 5000,
+    "device_id": "1c21bbc7859ccc1b",
+    "device_state": {
+        "audio_output": "SPEAKER",
+        "battery_level": 96,
+        "bluetooth_connected_devices": [],
+        "call_state": "IDLE",
+        "charge_type": "NONE",
+        "charging": False,
+        "dnd_active": False,
+        "headphones_connected": False,
+        "network_type": "WIFI",
+        "ringer_mode": "NORMAL",
+        "screen_on": False,
+        "wifi_connected": True
+    },
+    "inferred_activity": {
+        "activity": "STILL",
+        "confidence": 90
+    },
+    "location": {
+        "accuracy_m": 5.861,
+        "altitude_m": 64.4000015258789,
+        "bearing_deg": 0.0,
+        "latitude": 32.9029461,
+        "longitude": -117.1943529,
+        "speed_kmh": 0.05222311
+    },
+    "platform": "android",
+    "sensors": {
+        "accelerometer": {
+            "x": 0.016749758,
+            "y": 0.05503492,
+            "z": 9.777073
+        },
+        "ambient_light_lux": 25.987501,
+        "gravity": {
+            "x": -0.001727461,
+            "y": 0.04830556,
+            "z": 9.806531
+        },
+        "gyroscope": {
+            "x": -0.0003054324,
+            "y": 0.0010690134,
+            "z": 0.0003054324
+        },
+        "linear_acceleration": {
+            "x": 0.009898885,
+            "y": 0.00026234984,
+            "z": 0.0008125305
+        },
+        "magnetometer": {
+            "x": -14.3625,
+            "y": -10.481251,
+            "z": -12.056251
+        },
+        "pressure_hpa": 1000.0375,
+        "proximity_cm": 5.0,
+        "rotation_vector": {
+            "x": 0.0013183618,
+            "y": -0.0021041206,
+            "z": -0.8963982
+        },
+        "significant_motion_detected": False,
+        "step_count": 0
+    },
+    "timestamp": "2026-08-05T04:57:26.192124Z"
+}
