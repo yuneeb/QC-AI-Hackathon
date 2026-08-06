@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDeviceIp() {
-        binding.tvHttpUrl.text = "Fetch data at: http://10.73.293.247:8080/context"
+        binding.tvHttpUrl.text = "Fetch data at: http://10.73.51.106:8080/context"
     }
 
     // Checks which permissions are missing and shows the system dialog to request them

@@ -36,6 +36,7 @@ class SensorCollectorService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var activityDetector: ActivityDetector
+    private lateinit var batteryDetector: BatteryDetector
     private lateinit var fileWriter: ContextFileWriter
     private lateinit var httpServer: ContextHttpServer
     private val handler = Handler(Looper.getMainLooper())
@@ -60,6 +61,7 @@ class SensorCollectorService : Service(), SensorEventListener {
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         activityDetector = ActivityDetector()
+        batteryDetector = BatteryDetector()
         fileWriter = ContextFileWriter(this)
         httpServer = ContextHttpServer()
 
@@ -270,7 +272,8 @@ class SensorCollectorService : Service(), SensorEventListener {
             network_type = networkType,
             bluetooth_connected_devices = btDevices,
             foreground_app = getForegroundApp(),
-            ambient_noise_db = null  // reserved for future mic-based measurement
+            ambient_noise_db = null,  // reserved for future mic-based measurement
+            battery_score = batteryDetector.detect(batteryLevel, chargeType)
         )
     }
 
