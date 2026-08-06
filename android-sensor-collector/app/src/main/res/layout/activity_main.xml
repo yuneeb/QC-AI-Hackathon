@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Main screen layout: toggle button, status, HTTP URL, and live JSON preview. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Shows the HTTP URL teammates can use to fetch data -->
+    <TextView
+        android:id="@+id/tvHttpUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Waiting for WiFi…"
+        android:textSize="13sp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Start/Stop button -->
+    <Button
+        android:id="@+id/btnToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_collection"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Shows "Running" or "Stopped" -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/status_stopped"
+        android:textSize="15sp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latest snapshot:"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Scrollable area showing the live JSON preview -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tvJsonPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Not started yet."
+            android:textSize="11sp"
+            android:fontFamily="monospace" />
+
+    </ScrollView>
+
+</LinearLayout>

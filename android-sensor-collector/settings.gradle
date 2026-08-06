@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        google()          // Android build tools & plugins (hosted at maven.google.com)
+        mavenCentral()    // Kotlin, Gson, NanoHTTPD, etc.
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()          // AndroidX, Material, Play Services Location
+        mavenCentral()    // All other dependencies
+    }
+}
+
+rootProject.name = "SensorContext"
+include ':app'
