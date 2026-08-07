@@ -66,8 +66,17 @@ assumptions.
    ```powershell
    claude
    ```
-
-6. **Ask a question that depends on the physical world**, e.g. "Is it too
+6. **Install Arduino Code**
+   - Open Arduino App Lab
+   - Create a new user project
+   - Drag and drop the following files into their equivalent files on the arduino
+     * `sketch/sketch.ino`
+     * `sketch/sketch.yaml`
+     * `python/main.py`
+     * `app.yaml`
+   - Click Run
+   - Open the device shell and observe the server serving data at `http://<arduino-ip>:9000/data`
+8. **Ask a question that depends on the physical world**, e.g. "Is it too
    hot in here right now?" or "Am I moving?" Claude will call the
    `get_physical_context` tool automatically when it judges the question
    depends on real-world sensor/phone state.
