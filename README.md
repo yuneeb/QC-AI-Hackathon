@@ -47,7 +47,12 @@ assumptions.
    ```
    It listens on `http://127.0.0.1:18181` by default.
 
-4. **Register the MCP server with Claude Code**, run once from the repo
+4. **Register the MCP server with Claude Code.** This is a **stdio** server
+   — Claude Code launches it itself as a subprocess, there's no network
+   port to run or point at. That means the only thing you're doing here is
+   telling Claude Code *how* to launch it. Two ways to do that:
+
+   **Option A — CLI (local scope, one command).** Run once from the repo
    root (replace `<path-to-repo>` with the absolute path where you cloned
    it):
    ```powershell
@@ -59,10 +64,32 @@ assumptions.
    ```
    You should see `physical-context ... ✔ Connected`.
 
-5. **Launch Claude Code from the repo root.** The MCP server is registered
-   at local scope, so it's only active in sessions started here. If you had
-   a terminal open before step 4, open a new one — an already-running
-   session won't see a newly registered server.
+   **Option B — project config (`.mcp.json`, checked into the repo).**
+   Create a `.mcp.json` file at the repo root:
+   ```json
+   {
+     "mcpServers": {
+       "physical-context": {
+         "command": "<path-to-repo>/.venv/Scripts/python.exe",
+         "args": ["-m", "physical_context.server"],
+         "env": {
+           "PYTHONPATH": "<path-to-repo>"
+         }
+       }
+     }
+   }
+   ```
+   Claude Code detects this automatically when launched from the repo root
+   and will prompt you to approve the project-scoped server the first
+   time. This option is more portable for sharing the project — anyone who
+   clones the repo gets the same server config without running the CLI
+   command themselves.
+
+5. **Launch Claude Code from the repo root.** Either option only takes
+   effect for sessions started from inside this folder — that's how a
+   stdio server is scoped. If you had a terminal open before step 4, open
+   a new one; an already-running session won't see a newly registered
+   server.
    ```powershell
    claude
    ```
