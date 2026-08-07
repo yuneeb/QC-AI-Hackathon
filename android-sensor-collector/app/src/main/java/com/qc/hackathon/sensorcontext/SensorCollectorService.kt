@@ -1,11 +1,10 @@
-// Foreground service: reads all sensors every 5s and builds a ContextPayload.
+// Foreground service: reads all sensors every 1s and builds a ContextPayload.
 package com.qc.hackathon.sensorcontext
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothManager
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.Sensor
@@ -21,6 +20,8 @@ import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import android.util.Log
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
 import java.time.Instant
@@ -28,7 +29,7 @@ import java.time.Instant
 class SensorCollectorService : Service(), SensorEventListener {
 
     companion object {
-        const val COLLECTION_INTERVAL_MS = 5000L
+        const val COLLECTION_INTERVAL_MS = 1000L
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sensor_context_channel"
     }
@@ -145,6 +146,7 @@ class SensorCollectorService : Service(), SensorEventListener {
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             lastLocation = result.lastLocation
+            Log.d("SensorCollector", "Location received: ${lastLocation?.latitude}, ${lastLocation?.longitude}")
         }
     }
 
@@ -153,9 +155,18 @@ class SensorCollectorService : Service(), SensorEventListener {
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .build()
         try {
+            fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
+            if ((loc != null) && (lastLocation == null)) {
+                    lastLocation = loc
+                    Log.d("SensorCollector", "Initial location acquired from lastLocation")
+                }
+            }
             fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
+            Log.d("SensorCollector", "Location updates requested successfully")
         } catch (e: SecurityException) {
-            // Location permission not yet granted — location fields will be null
+            Log.e("SensorCollector", "Location permission missing: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("SensorCollector", "Error starting location updates: ${e.message}")
         }
     }
 
@@ -183,36 +194,36 @@ class SensorCollectorService : Service(), SensorEventListener {
         )
 
         return ContextPayload(
-            device_id = fetchDeviceId(),
+            deviceId = fetchDeviceId(),
             timestamp = Instant.now().toString(),
-            inferred_activity = activity,
+            inferredActivity = activity,
             location = loc?.let {
                 LocationData(
                     latitude = it.latitude,
                     longitude = it.longitude,
-                    altitude_m = it.altitude,
-                    accuracy_m = it.accuracy,
-                    speed_kmh = it.speed * 3.6f,
-                    bearing_deg = it.bearing,
-                    cardinal_direction = locationDetector.getCardinalDirection(it.bearing)
+                    altitudeM = it.altitude,
+                    accuracyM = it.accuracy,
+                    speedKmh = it.speed * 3.6f,
+                    bearingDeg = it.bearing,
+                    cardinalDirection = locationDetector.getCardinalDirection(it.bearing)
                 )
             },
             sensors = SensorData(
                 accelerometer = accel,
                 gyroscope = gyro,
-                linear_acceleration = linearAccel,
+                linearAcceleration = linearAccel,
                 gravity = gravity,
-                rotation_vector = rotationVec,
+                rotationVector = rotationVec,
                 magnetometer = magnetometer,
-                pressure_hpa = pressure,
-                ambient_light_lux = ambientLight,
-                proximity_cm = proximity,
-                temperature_c = temperature,
-                humidity_percent = humidity,
-                step_count = 0,
-                significant_motion_detected = significantMotion.also { significantMotion = false }
+                pressureHpa = pressure,
+                ambientLightLux = ambientLight,
+                proximityCm = proximity,
+                temperatureC = temperature,
+                humidityPercent = humidity,
+                stepCount = 0,
+                significantMotionDetected = significantMotion.also { significantMotion = false }
             ),
-            device_state = buildDeviceState(btDevices)
+            deviceState = buildDeviceState(btDevices)
         )
     }
 
@@ -247,69 +258,75 @@ class SensorCollectorService : Service(), SensorEventListener {
             else -> "NONE"
         }
 
+        @Suppress("DEPRECATION")
         return DeviceState(
-            screen_on = powerManager.isInteractive,
-            battery_level = batteryLevel,
+            screenOn = powerManager.isInteractive,
+            batteryLevel = batteryLevel,
             charging = charging,
-            charge_type = chargeType,
-            ringer_mode = when (audioManager.ringerMode) {
+            chargeType = chargeType,
+            ringerMode = when (audioManager.ringerMode) {
                 AudioManager.RINGER_MODE_NORMAL -> "NORMAL"
                 AudioManager.RINGER_MODE_VIBRATE -> "VIBRATE"
                 else -> "SILENT"
             },
-            dnd_active = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL,
-            call_state = when (telephonyManager.callState) {
+            dndActive = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL,
+            callState = when (telephonyManager.callState) {
                 TelephonyManager.CALL_STATE_RINGING -> "RINGING"
                 TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
                 else -> "IDLE"
             },
-            headphones_connected = audioManager.isWiredHeadsetOn,
-            audio_output = when {
+            headphonesConnected = audioManager.isWiredHeadsetOn,
+            audioOutput = when {
                 audioManager.isBluetoothA2dpOn -> "BLUETOOTH"
                 audioManager.isWiredHeadsetOn -> "WIRED_HEADSET"
                 else -> "SPEAKER"
             },
-            wifi_connected = wifiConnected,
-            network_type = networkType,
-            bluetooth_connected_devices = btDevices,
-            foreground_app = getForegroundApp(),
-            ambient_noise_db = null  // reserved for future mic-based measurement
+            wifiConnected = wifiConnected,
+            networkType = networkType,
+            bluetoothConnectedDevices = btDevices,
+            foregroundApp = getForegroundApp(),
+            ambientNoiseDb = null  // reserved for future mic-based measurement
         )
     }
 
     private fun getBluetoothDevices(): List<String> {
         return try {
-            val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val btManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             btManager.adapter?.bondedDevices
+                ?.asSequence()
                 ?.filter { it.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED }
                 ?.map { it.name ?: "Unknown" }
-                ?: emptyList()
-        } catch (e: SecurityException) {
+                ?.toList() ?: emptyList()
+        } catch (_: SecurityException) {
             emptyList()
         }
     }
 
     private fun getCellularType(tm: TelephonyManager): String {
         return try {
-            when (tm.dataNetworkType) {
+            @Suppress("DEPRECATION")
+            when (tm.networkType) {
                 TelephonyManager.NETWORK_TYPE_NR -> "5G"
                 TelephonyManager.NETWORK_TYPE_LTE -> "LTE"
                 TelephonyManager.NETWORK_TYPE_HSPAP,
-                TelephonyManager.NETWORK_TYPE_HSPA -> "3G"
+                TelephonyManager.NETWORK_TYPE_HSPA,
+                -> "3G"
                 else -> "CELLULAR"
             }
-        } catch (e: SecurityException) { "CELLULAR" }
+        } catch (_: SecurityException) {
+            "CELLULAR"
+        }
     }
 
     private fun getForegroundApp(): String? {
         return try {
-            val usm = getSystemService(Context.USAGE_STATS_SERVICE)
+            val usm = getSystemService(USAGE_STATS_SERVICE)
                     as android.app.usage.UsageStatsManager
             val now = System.currentTimeMillis()
             usm.queryUsageStats(
                 android.app.usage.UsageStatsManager.INTERVAL_DAILY, now - 10000, now
             )?.maxByOrNull { it.lastTimeUsed }?.packageName
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null  // requires PACKAGE_USAGE_STATS — user must grant manually in Settings
         }
     }
@@ -320,14 +337,16 @@ class SensorCollectorService : Service(), SensorEventListener {
     // Computes the magnitude (total intensity) of a 3-axis vector
     private fun magnitude(v: Vector3?): Float {
         if (v == null) return 0f
-        return kotlin.math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+        return kotlin.math.sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z))
     }
 
     // ── Foreground notification (keeps service alive when app is closed) ──────
 
     private fun startForegroundNotification() {
         val channel = NotificationChannel(
-            CHANNEL_ID, "Sensor Context", NotificationManager.IMPORTANCE_LOW
+            CHANNEL_ID,
+            "Sensor Context",
+            NotificationManager.IMPORTANCE_LOW,
         )
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -335,6 +354,10 @@ class SensorCollectorService : Service(), SensorEventListener {
             .setContentText("Collecting sensor data…")
             .setSmallIcon(android.R.drawable.ic_menu_compass)
             .build()
-        startForeground(NOTIFICATION_ID, notification)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 }

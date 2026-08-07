@@ -4,6 +4,7 @@
     <string name="app_name">Android Context</string>
     <string name="start_collection">Start Collection</string>
     <string name="stop_collection">Stop Collection</string>
-    <string name="status_running">● Running — collecting every 5s</string>
+    <string name="status_running">● Running — collecting every 1s</string>
     <string name="status_stopped">○ Stopped</string>
+    <string name="http_url_format">Fetch data at: %1$s</string>
 </resources>
