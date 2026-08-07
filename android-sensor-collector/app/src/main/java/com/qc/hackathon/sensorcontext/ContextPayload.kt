@@ -70,3 +70,10 @@ data class ContextPayload(
     // Converts this object to a pretty-printed JSON string
     fun toJson(): String = GsonBuilder().setPrettyPrinting().create().toJson(this)
 }
+
+// A batch of snapshots (e.g., the last 5 seconds of data)
+data class ContextBatch(
+    val snapshots: List<ContextPayload>
+) {
+    fun toJson(): String = GsonBuilder().setPrettyPrinting().create().toJson(this)
+}
