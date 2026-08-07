@@ -43,6 +43,7 @@ class ActivityDetector {
                 InferredActivity("UNKNOWN", 40)
         }
 
+        stepsInWindow = 0
         return result
     }
 

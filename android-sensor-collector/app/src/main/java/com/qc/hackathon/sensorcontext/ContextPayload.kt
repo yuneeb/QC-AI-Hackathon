@@ -40,7 +40,6 @@ data class DeviceState(
     @SerializedName("screen_on") val screenOn: Boolean,
     @SerializedName("battery_level") val batteryLevel: Int,
     val charging: Boolean,
-<<<<<<< HEAD
     @SerializedName("charge_type") val chargeType: String,        // "AC", "USB", "WIRELESS", "NONE"
     @SerializedName("ringer_mode") val ringerMode: String,        // "NORMAL", "VIBRATE", "SILENT"
     @SerializedName("dnd_active") val dndActive: Boolean,
@@ -52,21 +51,6 @@ data class DeviceState(
     @SerializedName("bluetooth_connected_devices") val bluetoothConnectedDevices: List<String>,
     @SerializedName("foreground_app") val foregroundApp: String?,
     @SerializedName("ambient_noise_db") val ambientNoiseDb: Float?,
-=======
-    val charge_type: String,        // "AC", "USB", "WIRELESS", "NONE"
-    val ringer_mode: String,        // "NORMAL", "VIBRATE", "SILENT"
-    val dnd_active: Boolean,
-    val call_state: String,         // "IDLE", "RINGING", "OFFHOOK"
-    val headphones_connected: Boolean,
-    val audio_output: String,       // "SPEAKER", "WIRED_HEADSET", "BLUETOOTH"
-    val wifi_connected: Boolean,
-    val network_type: String,       // "WIFI", "LTE", "5G", "3G", "NONE"
-    val bluetooth_connected_devices: List<String>,
-    val foreground_app: String?,
-    val ambient_noise_db: Float?,
-    val battery_score: Int,          // 1 (bad) to 5 (best)
-    val voice_confidence: Int        // 0 to 100
->>>>>>> e2e6642 (VoiceDetector)
 )
 
 // Rule-based activity inference result
@@ -87,9 +71,12 @@ data class ContextPayload(
     @SerializedName("device_state") val deviceState: DeviceState,
 ) {
     // Converts this object to a pretty-printed JSON string
-    fun toJson(): String = GsonBuilder()
-        .setPrettyPrinting()
-        .serializeNulls()
-        .create()
-        .toJson(this)
+    fun toJson(): String = GsonBuilder().setPrettyPrinting().create().toJson(this)
+}
+
+// A batch of snapshots (e.g., the last 5 seconds of data)
+data class ContextBatch(
+    val snapshots: List<ContextPayload>
+) {
+    fun toJson(): String = GsonBuilder().setPrettyPrinting().create().toJson(this)
 }
