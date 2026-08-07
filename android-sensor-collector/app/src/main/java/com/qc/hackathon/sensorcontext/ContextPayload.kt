@@ -2,6 +2,7 @@
 package com.qc.hackathon.sensorcontext
 
 import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 
 // 3-axis sensor reading (accelerometer, gyroscope, etc.)
 data class Vector3(val x: Float, val y: Float, val z: Float)
@@ -10,62 +11,64 @@ data class Vector3(val x: Float, val y: Float, val z: Float)
 data class LocationData(
     val latitude: Double,
     val longitude: Double,
-    val altitude_m: Double,
-    val accuracy_m: Float,
-    val speed_kmh: Float,
-    val bearing_deg: Float
+    @SerializedName("altitude_m") val altitudeM: Double,
+    @SerializedName("accuracy_m") val accuracyM: Float,
+    @SerializedName("speed_kmh") val speedKmh: Float,
+    @SerializedName("bearing_deg") val bearingDeg: Float,
+    @SerializedName("cardinal_direction") val cardinalDirection: String?,
 )
 
 // All SensorManager-based motion and environment readings
 data class SensorData(
     val accelerometer: Vector3?,
     val gyroscope: Vector3?,
-    val linear_acceleration: Vector3?,
+    @SerializedName("linear_acceleration") val linearAcceleration: Vector3?,
     val gravity: Vector3?,
-    val rotation_vector: Vector3?,
+    @SerializedName("rotation_vector") val rotationVector: Vector3?,
     val magnetometer: Vector3?,
-    val pressure_hpa: Float?,
-    val ambient_light_lux: Float?,
-    val proximity_cm: Float?,
-    val temperature_c: Float?,
-    val humidity_percent: Float?,
-    val step_count: Int,
-    val significant_motion_detected: Boolean
+    @SerializedName("pressure_hpa") val pressureHpa: Float?,
+    @SerializedName("ambient_light_lux") val ambientLightLux: Float?,
+    @SerializedName("proximity_cm") val proximityCm: Float?,
+    @SerializedName("temperature_c") val temperatureC: Float?,
+    @SerializedName("humidity_percent") val humidityPercent: Float?,
+    @SerializedName("step_count") val stepCount: Int,
+    @SerializedName("significant_motion_detected") val significantMotionDetected: Boolean,
 )
 
 // System-level device state (not from SensorManager)
 data class DeviceState(
-    val screen_on: Boolean,
-    val battery_level: Int,
+    @SerializedName("screen_on") val screenOn: Boolean,
+    @SerializedName("battery_level") val batteryLevel: Int,
     val charging: Boolean,
-    val charge_type: String,        // "AC", "USB", "WIRELESS", "NONE"
-    val ringer_mode: String,        // "NORMAL", "VIBRATE", "SILENT"
-    val dnd_active: Boolean,
-    val call_state: String,         // "IDLE", "RINGING", "OFFHOOK"
-    val headphones_connected: Boolean,
-    val audio_output: String,       // "SPEAKER", "WIRED_HEADSET", "BLUETOOTH"
-    val wifi_connected: Boolean,
-    val network_type: String,       // "WIFI", "LTE", "5G", "3G", "NONE"
-    val bluetooth_connected_devices: List<String>,
-    val foreground_app: String?,
-    val ambient_noise_db: Float?
+    @SerializedName("charge_type") val chargeType: String,        // "AC", "USB", "WIRELESS", "NONE"
+    @SerializedName("ringer_mode") val ringerMode: String,        // "NORMAL", "VIBRATE", "SILENT"
+    @SerializedName("dnd_active") val dndActive: Boolean,
+    @SerializedName("call_state") val callState: String,         // "IDLE", "RINGING", "OFFHOOK"
+    @SerializedName("headphones_connected") val headphonesConnected: Boolean,
+    @SerializedName("audio_output") val audioOutput: String,       // "SPEAKER", "WIRED_HEADSET", "BLUETOOTH"
+    @SerializedName("wifi_connected") val wifiConnected: Boolean,
+    @SerializedName("network_type") val networkType: String,       // "WIFI", "LTE", "5G", "3G", "NONE"
+    @SerializedName("bluetooth_connected_devices") val bluetoothConnectedDevices: List<String>,
+    @SerializedName("foreground_app") val foregroundApp: String?,
+    @SerializedName("ambient_noise_db") val ambientNoiseDb: Float?,
 )
 
 // Rule-based activity inference result
 data class InferredActivity(
     val activity: String,   // "IN_VEHICLE", "RUNNING", "WALKING", "STILL", "UNKNOWN"
-    val confidence: Int     // 0–100
+    val confidence: Int,     // 0–100
 )
 
-// Top-level snapshot sent every 5 seconds
+// Top-level snapshot sent every 1 second
 data class ContextPayload(
-    val device_id: String,
+    @SerializedName("device_id") val deviceId: String,
     val timestamp: String,
     val platform: String = "android",
-    val collection_interval_ms: Long = 5000L,
+    @SerializedName("collection_interval_ms") val collectionIntervalMs: Long = 1000L,
+    @SerializedName("inferred_activity") val inferredActivity: InferredActivity,
     val location: LocationData?,
     val sensors: SensorData,
-    val device_state: DeviceState
+    @SerializedName("device_state") val deviceState: DeviceState,
 ) {
     // Converts this object to a pretty-printed JSON string
     fun toJson(): String = GsonBuilder().setPrettyPrinting().create().toJson(this)

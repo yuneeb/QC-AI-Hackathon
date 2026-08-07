@@ -4,6 +4,7 @@ package com.qc.hackathon.sensorcontext
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,14 +21,21 @@ class MainActivity : AppCompatActivity() {
     private var isRunning = false
 
     // Permissions we need to ask the user for at runtime
-    private val requiredPermissions = arrayOf(
+    private val requiredPermissions = mutableListOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.BLUETOOTH_CONNECT,
         Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.ACTIVITY_RECOGNITION,
-        Manifest.permission.POST_NOTIFICATIONS   // required on Android 13+ for foreground service notification
-    )
+    ).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            add(Manifest.permission.BLUETOOTH_CONNECT)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            add(Manifest.permission.ACTIVITY_RECOGNITION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }.toTypedArray()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,12 +73,13 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacks(statusRefreshRunnable)
     }
 
-    // Every 5s: reads the JSON file written by ContextFileWriter and shows a preview on screen
+    // Every 1s: reads the JSON file written by ContextFileWriter and shows a preview on screen
     private val statusRefreshRunnable = object : Runnable {
         override fun run() {
             val file = File(getExternalFilesDir(null), "context_snapshot.json")
             if (file.exists()) {
-                binding.tvJsonPreview.text = file.readText().take(400)
+                // Increase preview size to ensure voice_confidence is visible
+                binding.tvJsonPreview.text = file.readText().take(2000)
             }
             handler.postDelayed(this, SensorCollectorService.COLLECTION_INTERVAL_MS)
         }
