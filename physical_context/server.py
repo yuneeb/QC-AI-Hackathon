@@ -22,7 +22,7 @@ mcp = FastMCP("physical-context", instructions=INSTRUCTIONS)
 
 
 @mcp.tool()
-def get_physical_context(use_llm: bool = True) -> str:
+def get_physical_context(use_llm: bool = False) -> str:
     """Get the user's live physical surroundings (sensor board + phone).
 
     Fetches current readings from the environmental sensor board and the
@@ -31,11 +31,12 @@ def get_physical_context(use_llm: bool = True) -> str:
     location, movement, or physical state is relevant.
 
     Args:
-        use_llm: If True (default), the readings are first interpreted by a
-            locally running LLM into a short natural-language summary. If
-            False, that step is skipped -- avoiding its latency (up to ~2
-            minutes) and occasional garbled output -- and the raw labeled
-            sensor/phone readings are returned directly for you to interpret.
+        use_llm: If False (default), the local-LLM interpretation step is
+            skipped -- avoiding its latency (up to ~2 minutes) and occasional
+            garbled output -- and the raw labeled sensor/phone readings are
+            returned directly for you to interpret. If True, the readings are
+            first interpreted by a locally running LLM into a short
+            natural-language summary.
     """
     return build_physical_context(use_llm=use_llm)
 

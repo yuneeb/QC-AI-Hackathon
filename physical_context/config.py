@@ -23,10 +23,24 @@ CONTEXT_FALLBACK_FILE = REPO_ROOT / "data" / "phone.json"
 GENIEX_URL = "http://127.0.0.1:18181/v1/chat/completions"
 GENIEX_MODEL = "qualcomm/Qwen3-4B:W4A16"
 
+# Imagine SDK (cloud LLM) -- backup used when the local genieX server is
+# unreachable or fails. Leave blank to fall back to the IMAGINE_API_KEY /
+# IMAGINE_API_ENDPOINT environment variables (the SDK's own default lookup).
+IMAGINE_API_KEY = "***REMOVED***"
+IMAGINE_API_ENDPOINT = "https://aisuite.cirrascale.com/apis/v2"
+IMAGINE_MODEL = "Llama-3.1-8B"
+IMAGINE_TIMEOUT = 60.0
+
 # Caps generation length -- keeps latency down and avoids the model running
 # past its answer into repeating/degenerate output.
 LLM_MAX_TOKENS = 400
 
 # Timeouts, in seconds
-SENSOR_TIMEOUT = 10.0
+SENSOR_TIMEOUT = 15.0
 LLM_TIMEOUT = 180.0
+
+# Retry policy for the sensor/phone live fetches: try up to
+# SENSOR_RETRY_ATTEMPTS times, waiting SENSOR_RETRY_INTERVAL seconds between
+# attempts, before falling back to sample data (4 attempts x 15s ~= 1 minute).
+SENSOR_RETRY_ATTEMPTS = 4
+SENSOR_RETRY_INTERVAL = 15.0
