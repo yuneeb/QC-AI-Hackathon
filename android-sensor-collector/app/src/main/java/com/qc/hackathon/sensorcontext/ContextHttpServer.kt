@@ -10,8 +10,8 @@ class ContextHttpServer : NanoHTTPD("10.73.51.106", 8080) {
     private var latestJson: String = "{\"status\": \"waiting for first snapshot\"}"
 
     // Called by SensorCollectorService after each collection cycle
-    fun updatePayload(payload: ContextPayload) {
-        latestJson = payload.toJson()
+    fun updatePayload(batch: ContextBatch) {
+        latestJson = batch.toJson()
     }
 
     // Called by NanoHTTPD for every incoming HTTP request

@@ -70,8 +70,7 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             val file = File(getExternalFilesDir(null), "context_snapshot.json")
             if (file.exists()) {
-                // Increase preview size to ensure iterative payload is visible
-                binding.tvJsonPreview.text = file.readText().take(9000)
+                binding.tvJsonPreview.text = file.readText().take(400)
             }
             handler.postDelayed(this, SensorCollectorService.COLLECTION_INTERVAL_MS)
         }
