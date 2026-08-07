@@ -18,13 +18,14 @@ import android.os.BatteryManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
 import java.time.Instant
+import java.util.UUID
+import androidx.core.content.edit
 
 class SensorCollectorService : Service(), SensorEventListener {
 
@@ -190,7 +191,7 @@ class SensorCollectorService : Service(), SensorEventListener {
         val activity = activityDetector.infer(
             speedKmh = speedKmh,
             linearAccelMagnitude = magnitude(linearAccel),
-            bluetoothConnected = btDevices.isNotEmpty()
+            bluetoothConnected = btDevices.isNotEmpty(),
         )
 
         return ContextPayload(
@@ -221,9 +222,9 @@ class SensorCollectorService : Service(), SensorEventListener {
                 temperatureC = temperature,
                 humidityPercent = humidity,
                 stepCount = 0,
-                significantMotionDetected = significantMotion.also { significantMotion = false }
+                significantMotionDetected = significantMotion.also { significantMotion = false },
             ),
-            deviceState = buildDeviceState(btDevices)
+            deviceState = buildDeviceState(btDevices),
         )
     }
 
@@ -233,10 +234,10 @@ class SensorCollectorService : Service(), SensorEventListener {
         val batteryIntent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
         val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-        val batteryLevel = if (scale > 0) (level * 100 / scale) else -1
+        val batteryLevel = if (scale > 0) ((level * 100) / scale) else -1
         val chargeStatus = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-        val charging = chargeStatus == BatteryManager.BATTERY_STATUS_CHARGING ||
-                chargeStatus == BatteryManager.BATTERY_STATUS_FULL
+        val charging = (chargeStatus == BatteryManager.BATTERY_STATUS_CHARGING) ||
+                (chargeStatus == BatteryManager.BATTERY_STATUS_FULL)
         val chargeType = when (batteryIntent?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)) {
             BatteryManager.BATTERY_PLUGGED_AC -> "AC"
             BatteryManager.BATTERY_PLUGGED_USB -> "USB"
@@ -324,15 +325,22 @@ class SensorCollectorService : Service(), SensorEventListener {
                     as android.app.usage.UsageStatsManager
             val now = System.currentTimeMillis()
             usm.queryUsageStats(
-                android.app.usage.UsageStatsManager.INTERVAL_DAILY, now - 10000, now
+                android.app.usage.UsageStatsManager.INTERVAL_DAILY, now - 10000, now,
             )?.maxByOrNull { it.lastTimeUsed }?.packageName
         } catch (_: Exception) {
             null  // requires PACKAGE_USAGE_STATS — user must grant manually in Settings
         }
     }
 
-    private fun fetchDeviceId(): String =
-        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown"
+    private fun fetchDeviceId(): String {
+        val prefs = getSharedPreferences("sensor_prefs", MODE_PRIVATE)
+        var id = prefs.getString("device_id", null)
+        if (id == null) {
+            id = UUID.randomUUID().toString()
+            prefs.edit { putString("device_id", id) }
+        }
+        return id
+    }
 
     // Computes the magnitude (total intensity) of a 3-axis vector
     private fun magnitude(v: Vector3?): Float {
