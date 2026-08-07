@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App manifest: declares permissions, activities, and services. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ── Permissions ── -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />           <!-- HTTP server -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />       <!-- ambient noise -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />  <!-- API 31+ BT devices -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />   <!-- call state -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- WiFi/cellular check -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- step detector -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />   <!-- foreground service notification (API 33+) -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />                               <!-- foreground app -->
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <!-- Main screen -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Background sensor collection service -->
+        <service
+            android:name=".SensorCollectorService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
+
+    </application>
+
+</manifest>
