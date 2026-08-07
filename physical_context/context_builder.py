@@ -47,19 +47,34 @@ def _fetch(url: str, fallback_path, label: str):
     to a local sample file.
 
     Retries up to config.SENSOR_RETRY_ATTEMPTS times, waiting
-    config.SENSOR_RETRY_INTERVAL seconds between attempts.
+    config.SENSOR_RETRY_INTERVAL seconds between attempts, but the whole
+    thing is capped at config.SENSOR_TOTAL_TIMEOUT seconds of wall clock --
+    an unresponsive endpoint can't stall the caller past that. Each
+    individual attempt is also capped at whatever is left of that budget, so
+    a hung connection can't overshoot it either.
 
     Returns (data, is_live, error_message). error_message is None unless both
     the live fetch and the fallback failed.
     """
+    deadline = time.monotonic() + config.SENSOR_TOTAL_TIMEOUT
     live_error = None
     for attempt in range(config.SENSOR_RETRY_ATTEMPTS):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
         try:
-            return fetch_api_data(url, timeout=config.SENSOR_TIMEOUT), True, None
+            attempt_timeout = min(config.SENSOR_TIMEOUT, remaining)
+            return fetch_api_data(url, timeout=attempt_timeout), True, None
         except APIFetchError as error:
             live_error = error
-            if attempt < config.SENSOR_RETRY_ATTEMPTS - 1:
+            # Only wait before retrying if there's budget left for the wait
+            # *and* an attempt after it.
+            remaining = deadline - time.monotonic()
+            if attempt < config.SENSOR_RETRY_ATTEMPTS - 1 and remaining > config.SENSOR_RETRY_INTERVAL:
                 time.sleep(config.SENSOR_RETRY_INTERVAL)
+
+    if live_error is None:
+        live_error = f"no attempt completed within {config.SENSOR_TOTAL_TIMEOUT:g}s"
 
     fallback_data, fallback_error = _load_fallback(fallback_path, label)
     if fallback_data is not None:

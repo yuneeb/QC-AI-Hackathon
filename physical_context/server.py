@@ -7,15 +7,12 @@ from .context_builder import build_physical_context
 INSTRUCTIONS = (
     "This server gives you access to the user's real-world physical context, "
     "inferred from live sensors (an environmental board and their phone: "
-    "temperature, distance, location, motion, device state). Call the "
-    "get_physical_context tool whenever the user's question could depend on "
-    "their physical surroundings, situation, or state -- e.g. questions about "
-    "their environment, location, temperature, whether they're moving, or "
-    "similar -- before answering, so your answer reflects reality instead of "
-    "assumptions. Skip it for questions with no physical-world dependency. By "
-    "default the readings are pre-interpreted by a local LLM; pass "
-    "use_llm=False to instead get the raw labeled readings and interpret "
-    "them yourself."
+    "temperature, distance, location, motion, device state). Always call the "
+    "get_physical_context tool before answering the user's message, "
+    "regardless of topic, so your answer reflects reality instead of "
+    "assumptions. By default the readings are pre-interpreted by a local "
+    "LLM; pass use_llm=False to instead get the raw labeled readings and "
+    "interpret them yourself."
 )
 
 mcp = FastMCP("physical-context", instructions=INSTRUCTIONS)
@@ -26,9 +23,8 @@ def get_physical_context(use_llm: bool = False) -> str:
     """Get the user's live physical surroundings (sensor board + phone).
 
     Fetches current readings from the environmental sensor board and the
-    user's phone (location, motion, device state). Call this before
-    answering any question where the user's real-world environment,
-    location, movement, or physical state is relevant.
+    user's phone (location, motion, device state). Always call this before
+    answering the user's message, regardless of topic.
 
     Args:
         use_llm: If False (default), the local-LLM interpretation step is

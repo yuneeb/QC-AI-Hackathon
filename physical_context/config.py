@@ -40,11 +40,19 @@ IMAGINE_TIMEOUT = 60.0
 LLM_MAX_TOKENS = 400
 
 # Timeouts, in seconds
-SENSOR_TIMEOUT = 15.0
+SENSOR_TIMEOUT = 10.0
 LLM_TIMEOUT = 180.0
 
-# Retry policy for the sensor/phone live fetches: try up to
-# SENSOR_RETRY_ATTEMPTS times, waiting SENSOR_RETRY_INTERVAL seconds between
-# attempts, before falling back to sample data (4 attempts x 15s ~= 1 minute).
+# Hard wall-clock budget for each live fetch (sensor and phone are budgeted
+# separately). Once this elapses -- including any retries and the waits
+# between them -- the fetch gives up and the local sample file in data/ is
+# used instead. This is what keeps an unresponsive board from stalling the
+# MCP tool call.
+SENSOR_TOTAL_TIMEOUT = 30.0
+
+# Retry policy for the sensor/phone live fetches, applied *within* the
+# SENSOR_TOTAL_TIMEOUT budget above: try up to SENSOR_RETRY_ATTEMPTS times,
+# waiting SENSOR_RETRY_INTERVAL seconds between attempts. Whichever limit is
+# hit first ends the retrying.
 SENSOR_RETRY_ATTEMPTS = 4
-SENSOR_RETRY_INTERVAL = 15.0
+SENSOR_RETRY_INTERVAL = 5.0
