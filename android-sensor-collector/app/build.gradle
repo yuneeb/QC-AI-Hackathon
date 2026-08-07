@@ -1,0 +1,50 @@
+// App-level: configures the app module, SDK versions, and all dependencies.
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.qc.hackathon.sensorcontext'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.qc.hackathon.sensorcontext"
+        minSdk 26        // Android 8.0 minimum
+        targetSdk 35     // Android 15
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true  // lets us reference UI elements without findViewById
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    implementation 'com.google.android.gms:play-services-location:21.1.0'  // GPS + speed
+    implementation 'com.google.code.gson:gson:2.10.1'                      // JSON serialization
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'                         // local HTTP server
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3' // async/background
+    implementation 'androidx.lifecycle:lifecycle-service:2.7.0'            // lifecycle-aware service
+}
