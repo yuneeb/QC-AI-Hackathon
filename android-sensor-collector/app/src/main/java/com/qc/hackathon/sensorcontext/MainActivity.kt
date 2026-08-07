@@ -78,10 +78,7 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             val file = File(getExternalFilesDir(null), "context_snapshot.json")
             if (file.exists()) {
-<<<<<<< HEAD
-=======
                 // Increase preview size to ensure voice_confidence is visible
->>>>>>> e2e6642 (VoiceDetector)
                 binding.tvJsonPreview.text = file.readText().take(2000)
             }
             handler.postDelayed(this, SensorCollectorService.COLLECTION_INTERVAL_MS)
@@ -89,8 +86,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDeviceIp() {
-        val url = "http://10.73.293.247:8080/context"
-        binding.tvHttpUrl.text = getString(R.string.http_url_format, url)
+        binding.tvHttpUrl.text = "Fetch data at: http://10.73.51.106:8080/context"
     }
 
     // Checks which permissions are missing and shows the system dialog to request them
