@@ -78,6 +78,10 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             val file = File(getExternalFilesDir(null), "context_snapshot.json")
             if (file.exists()) {
+<<<<<<< HEAD
+=======
+                // Increase preview size to ensure voice_confidence is visible
+>>>>>>> e2e6642 (VoiceDetector)
                 binding.tvJsonPreview.text = file.readText().take(2000)
             }
             handler.postDelayed(this, SensorCollectorService.COLLECTION_INTERVAL_MS)
