@@ -49,7 +49,8 @@ data class DeviceState(
     val bluetooth_connected_devices: List<String>,
     val foreground_app: String?,
     val ambient_noise_db: Float?,
-    val battery_score: Int          // 1 (bad) to 5 (best)
+    val battery_score: Int,          // 1 (bad) to 5 (best)
+    val voice_confidence: Int        // 0 to 100
 )
 
 // Rule-based activity inference result

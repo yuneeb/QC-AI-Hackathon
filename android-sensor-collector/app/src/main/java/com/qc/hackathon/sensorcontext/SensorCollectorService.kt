@@ -37,6 +37,7 @@ class SensorCollectorService : Service(), SensorEventListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var activityDetector: ActivityDetector
     private lateinit var batteryDetector: BatteryDetector
+    private lateinit var voiceDetector: VoiceDetector
     private lateinit var fileWriter: ContextFileWriter
     private lateinit var httpServer: ContextHttpServer
     private val handler = Handler(Looper.getMainLooper())
@@ -62,6 +63,7 @@ class SensorCollectorService : Service(), SensorEventListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         activityDetector = ActivityDetector()
         batteryDetector = BatteryDetector()
+        voiceDetector = VoiceDetector()
         fileWriter = ContextFileWriter(this)
         httpServer = ContextHttpServer()
 
@@ -246,8 +248,25 @@ class SensorCollectorService : Service(), SensorEventListener {
             else -> "NONE"
         }
 
+        // Extract variables before constructor call to fix Unresolved Reference
+        val screen_on = powerManager.isInteractive
+        val dnd_active = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+        val call_state = when (telephonyManager.callState) {
+            TelephonyManager.CALL_STATE_RINGING -> "RINGING"
+            TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
+            else -> "IDLE"
+        }
+        val headphones_connected = audioManager.isWiredHeadsetOn
+        val audio_output = when {
+            audioManager.isBluetoothA2dpOn -> "BLUETOOTH"
+            audioManager.isWiredHeadsetOn -> "WIRED_HEADSET"
+            else -> "SPEAKER"
+        }
+
+        val battery_score = batteryDetector.detect(batteryLevel, chargeType)
+
         return DeviceState(
-            screen_on = powerManager.isInteractive,
+            screen_on = screen_on,
             battery_level = batteryLevel,
             charging = charging,
             charge_type = chargeType,
@@ -256,24 +275,25 @@ class SensorCollectorService : Service(), SensorEventListener {
                 AudioManager.RINGER_MODE_VIBRATE -> "VIBRATE"
                 else -> "SILENT"
             },
-            dnd_active = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL,
-            call_state = when (telephonyManager.callState) {
-                TelephonyManager.CALL_STATE_RINGING -> "RINGING"
-                TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
-                else -> "IDLE"
-            },
-            headphones_connected = audioManager.isWiredHeadsetOn,
-            audio_output = when {
-                audioManager.isBluetoothA2dpOn -> "BLUETOOTH"
-                audioManager.isWiredHeadsetOn -> "WIRED_HEADSET"
-                else -> "SPEAKER"
-            },
+            dnd_active = dnd_active,
+            call_state = call_state,
+            headphones_connected = headphones_connected,
+            audio_output = audio_output,
             wifi_connected = wifiConnected,
             network_type = networkType,
             bluetooth_connected_devices = btDevices,
             foreground_app = getForegroundApp(),
             ambient_noise_db = null,  // reserved for future mic-based measurement
-            battery_score = batteryDetector.detect(batteryLevel, chargeType)
+            battery_score = battery_score,
+            voice_confidence = voiceDetector.detectConfidence(
+                audio_output = audio_output,
+                headphones_connected = headphones_connected,
+                dnd_active = dnd_active,
+                screen_on = screen_on,
+                call_state = call_state,
+                activity = "STILL", // HARDCODED FOR TESTING
+                battery_score = battery_score
+            )
         )
     }
 
