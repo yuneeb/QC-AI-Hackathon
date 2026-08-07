@@ -6,7 +6,10 @@ server are reachable at different addresses on your network.
 
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(REPO_ROOT / ".env")
 
 # Arduino board: temperature + distance readings (see sensor_data/python/main.py)
 SENSOR_DATA_URL = "http://10.73.51.136:9000/data"
@@ -24,10 +27,11 @@ GENIEX_URL = "http://127.0.0.1:18181/v1/chat/completions"
 GENIEX_MODEL = "qualcomm/Qwen3-4B:W4A16"
 
 # Imagine SDK (cloud LLM) -- backup used when the local genieX server is
-# unreachable or fails. Leave blank to fall back to the IMAGINE_API_KEY /
-# IMAGINE_API_ENDPOINT environment variables (the SDK's own default lookup).
-IMAGINE_API_KEY = "***REMOVED***"
-IMAGINE_API_ENDPOINT = "https://aisuite.cirrascale.com/apis/v2"
+# unreachable or fails. Left blank -- real values come from .env (see
+# .env.example), loaded above via load_dotenv() and read by the SDK itself
+# from the IMAGINE_API_KEY / IMAGINE_API_ENDPOINT environment variables.
+IMAGINE_API_KEY = ""
+IMAGINE_API_ENDPOINT = ""
 IMAGINE_MODEL = "Llama-3.1-8B"
 IMAGINE_TIMEOUT = 60.0
 
