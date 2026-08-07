@@ -13,7 +13,8 @@ data class LocationData(
     val altitude_m: Double,
     val accuracy_m: Float,
     val speed_kmh: Float,
-    val bearing_deg: Float
+    val bearing_deg: Float,
+    val cardinal_direction: String?
 )
 
 // All SensorManager-based motion and environment readings

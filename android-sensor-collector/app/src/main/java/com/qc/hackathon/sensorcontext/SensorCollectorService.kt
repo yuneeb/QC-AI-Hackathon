@@ -36,6 +36,7 @@ class SensorCollectorService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var activityDetector: ActivityDetector
+    private lateinit var locationDetector: LocationDetector
     private lateinit var fileWriter: ContextFileWriter
     private lateinit var httpServer: ContextHttpServer
     private val handler = Handler(Looper.getMainLooper())
@@ -60,6 +61,7 @@ class SensorCollectorService : Service(), SensorEventListener {
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         activityDetector = ActivityDetector()
+        locationDetector = LocationDetector()
         fileWriter = ContextFileWriter(this)
         httpServer = ContextHttpServer()
 
@@ -191,7 +193,8 @@ class SensorCollectorService : Service(), SensorEventListener {
                     altitude_m = it.altitude,
                     accuracy_m = it.accuracy,
                     speed_kmh = it.speed * 3.6f,
-                    bearing_deg = it.bearing
+                    bearing_deg = it.bearing,
+                    cardinal_direction = locationDetector.getCardinalDirection(it.bearing)
                 )
             },
             sensors = SensorData(
