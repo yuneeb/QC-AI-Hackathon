@@ -103,6 +103,17 @@ assumptions.
      * `app.yaml`
    - Click Run
    - Open the device shell and observe the server serving data at `http://<arduino-ip>:9000/data`
+7. **Set up the Android sensor collector app.**
+   - Clone the Repository:
+      ```bash
+      git clone https://github.com/QC-AI-Hackathon/android-sensor-collector.git
+      ```
+   - Build and Deploy: Open the project in Android Studio and run it on your connected device.
+   - Grant Permissions: Upon first launch, the app will request necessary permissions. Ensure all are granted for full functionality.
+   - Start Collection: Tap the Start Collection button in the main UI. A foreground notification will appear, indicating that the service is running even if the app is closed.
+   - Access Data:
+      http://<device-ip>:8080/context
+   - File Access: The data is also written to: /Android/data/com.qc.hackathon.sensorcontext/files/context_snapshot.json
 8. **Ask a question that depends on the physical world**, e.g. "Is it too
    hot in here right now?" or "Am I moving?" Claude will call the
    `get_physical_context` tool automatically when it judges the question
@@ -136,6 +147,37 @@ QC-AI-Hackathon/
 ├── LICENSE                  # MIT
 └── CLAUDE.md                # detailed dev notes/context for future sessions
 ```
+
+# Android Sensor Collector (AndroidContext)
+
+Android Sensor Collector is a robust background service application designed to gather, process, and expose real-time contextual data from an Android device. It builds a comprehensive "Context Payload" every 5 seconds, which includes high-frequency sensor readings, precise location data, and detailed device state metrics. This tool is ideal for developers and researchers building context-aware applications, AI agents, or performing real-time sensor data analysis.
+
+## Core Features
+
+- Real-time Sensor Fusion: Continuously collects data from Accelerometer, Gyroscope, Linear Acceleration, Gravity, Rotation Vector, Magnetometer, Barometer, Light, Proximity, Temperature, and Humidity sensors.
+- Intelligent Activity Inference: Uses raw motion data and GPS speed to infer the user's current activity (e.g., Still, Walking, Running, In-Vehicle).
+- Comprehensive Device State: Monitors battery level/health, charging status, network connectivity (WiFi/Cellular), audio output state, and "Do Not Disturb" status.
+- Voice Confidence Scoring: Implements a rule-based logic to determine the confidence level for voice-based interactions based on environmental and device cues.
+- Dual Data Exposure:
+
+## Getting Started
+
+### Prerequisites
+
+- Android Device: Android 8.0 (API level 26) or higher.
+- Android Studio: Jellyfish or newer recommended.
+- Permissions: The app requires several runtime permissions to get all the context, including Location (Fine), Audio Record (for noise estimation), Phone State, Activity Recognition, and Bluetooth (for connected device detection).
+
+## Project Structure
+
+- SensorCollectorService.kt: The core foreground service handling sensor registration and the collection loop.
+- ContextPayload.kt: Defines the data models and JSON serialization logic.
+- ContextHttpServer.kt: A lightweight embedded HTTP server using NanoHTTPD.
+- ContextFileWriter.kt: Handles atomic JSON file writes to local storage.
+
+## Android Output
+
+A sample Android context payload is available at [sample_android_snapshot.json](sample_android_snapshot.json). This file illustrates the JSON structure emitted by the collector and can be used as a reference for integration or testing.
 
 ## License
 
