@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- All user-visible strings used in the app. -->
+<resources>
+    <string name="app_name">Android Context</string>
+    <string name="start_collection">Start Collection</string>
+    <string name="stop_collection">Stop Collection</string>
+    <string name="status_running">● Running — collecting every 1s</string>
+    <string name="status_stopped">○ Stopped</string>
+</resources>
