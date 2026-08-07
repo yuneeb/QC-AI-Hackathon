@@ -63,7 +63,6 @@ data class ContextPayload(
     val timestamp: String,
     val platform: String = "android",
     val collection_interval_ms: Long = 5000L,
-    val inferred_activity: InferredActivity,
     val location: LocationData?,
     val sensors: SensorData,
     val device_state: DeviceState
