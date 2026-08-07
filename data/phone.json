@@ -7,13 +7,13 @@
         "bluetooth_connected_devices": [],
         "call_state": "IDLE",
         "charge_type": "NONE",
-        "charging": False,
-        "dnd_active": False,
-        "headphones_connected": False,
+        "charging": false,
+        "dnd_active": false,
+        "headphones_connected": false,
         "network_type": "WIFI",
         "ringer_mode": "NORMAL",
-        "screen_on": False,
-        "wifi_connected": True
+        "screen_on": false,
+        "wifi_connected": true
     },
     "inferred_activity": {
         "activity": "STILL",
@@ -62,7 +62,7 @@
             "y": -0.0021041206,
             "z": -0.8963982
         },
-        "significant_motion_detected": False,
+        "significant_motion_detected": false,
         "step_count": 0
     },
     "timestamp": "2026-08-05T04:57:26.192124Z"
