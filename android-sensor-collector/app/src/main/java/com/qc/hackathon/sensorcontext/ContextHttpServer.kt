@@ -3,9 +3,9 @@ package com.qc.hackathon.sensorcontext
 
 import fi.iki.elonen.NanoHTTPD
 
-class ContextHttpServer : NanoHTTPD(8080) {
+class ContextHttpServer : NanoHTTPD("10.73.51.106", 8080) {
 
-    // Holds the most recent JSON string; updated every 1s by SensorCollectorService
+    // Holds the most recent JSON string; updated every 5s by SensorCollectorService
     @Volatile
     private var latestJson: String = "{\"status\": \"waiting for first snapshot\"}"
 

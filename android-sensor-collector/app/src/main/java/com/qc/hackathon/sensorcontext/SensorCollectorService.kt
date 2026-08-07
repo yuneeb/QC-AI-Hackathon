@@ -28,7 +28,7 @@ import java.time.Instant
 class SensorCollectorService : Service(), SensorEventListener {
 
     companion object {
-        const val COLLECTION_INTERVAL_MS = 5000L
+        const val COLLECTION_INTERVAL_MS = 1000L
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sensor_context_channel"
     }
@@ -171,19 +171,10 @@ class SensorCollectorService : Service(), SensorEventListener {
     private fun buildPayload(): ContextPayload {
         val loc = lastLocation
         val btDevices = getBluetoothDevices()
-        val speedKmh = loc?.speed?.times(3.6f)  // convert m/s → km/h
-
-        // Pass the 3 key signals to ActivityDetector for activity inference
-        val activity = activityDetector.infer(
-            speedKmh = speedKmh,
-            linearAccelMagnitude = magnitude(linearAccel),
-            bluetoothConnected = btDevices.isNotEmpty()
-        )
 
         return ContextPayload(
             device_id = fetchDeviceId(),
             timestamp = Instant.now().toString(),
-            inferred_activity = activity,
             location = loc?.let {
                 LocationData(
                     latitude = it.latitude,
@@ -244,8 +235,23 @@ class SensorCollectorService : Service(), SensorEventListener {
             else -> "NONE"
         }
 
+        // Extract variables before constructor call to fix Unresolved Reference
+        val screen_on = powerManager.isInteractive
+        val dnd_active = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+        val call_state = when (telephonyManager.callState) {
+            TelephonyManager.CALL_STATE_RINGING -> "RINGING"
+            TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
+            else -> "IDLE"
+        }
+        val headphones_connected = audioManager.isWiredHeadsetOn
+        val audio_output = when {
+            audioManager.isBluetoothA2dpOn -> "BLUETOOTH"
+            audioManager.isWiredHeadsetOn -> "WIRED_HEADSET"
+            else -> "SPEAKER"
+        }
+
         return DeviceState(
-            screen_on = powerManager.isInteractive,
+            screen_on = screen_on,
             battery_level = batteryLevel,
             charging = charging,
             charge_type = chargeType,
@@ -254,18 +260,10 @@ class SensorCollectorService : Service(), SensorEventListener {
                 AudioManager.RINGER_MODE_VIBRATE -> "VIBRATE"
                 else -> "SILENT"
             },
-            dnd_active = notifManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL,
-            call_state = when (telephonyManager.callState) {
-                TelephonyManager.CALL_STATE_RINGING -> "RINGING"
-                TelephonyManager.CALL_STATE_OFFHOOK -> "OFFHOOK"
-                else -> "IDLE"
-            },
-            headphones_connected = audioManager.isWiredHeadsetOn,
-            audio_output = when {
-                audioManager.isBluetoothA2dpOn -> "BLUETOOTH"
-                audioManager.isWiredHeadsetOn -> "WIRED_HEADSET"
-                else -> "SPEAKER"
-            },
+            dnd_active = dnd_active,
+            call_state = call_state,
+            headphones_connected = headphones_connected,
+            audio_output = audio_output,
             wifi_connected = wifiConnected,
             network_type = networkType,
             bluetooth_connected_devices = btDevices,
