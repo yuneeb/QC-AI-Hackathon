@@ -28,7 +28,7 @@ import java.time.Instant
 class SensorCollectorService : Service(), SensorEventListener {
 
     companion object {
-        const val COLLECTION_INTERVAL_MS = 5000L
+        const val COLLECTION_INTERVAL_MS = 1000L
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sensor_context_channel"
     }
@@ -36,8 +36,6 @@ class SensorCollectorService : Service(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var activityDetector: ActivityDetector
-    private lateinit var batteryDetector: BatteryDetector
-    private lateinit var voiceDetector: VoiceDetector
     private lateinit var fileWriter: ContextFileWriter
     private lateinit var httpServer: ContextHttpServer
     private val handler = Handler(Looper.getMainLooper())
@@ -62,8 +60,6 @@ class SensorCollectorService : Service(), SensorEventListener {
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         activityDetector = ActivityDetector()
-        batteryDetector = BatteryDetector()
-        voiceDetector = VoiceDetector()
         fileWriter = ContextFileWriter(this)
         httpServer = ContextHttpServer()
 
@@ -175,19 +171,10 @@ class SensorCollectorService : Service(), SensorEventListener {
     private fun buildPayload(): ContextPayload {
         val loc = lastLocation
         val btDevices = getBluetoothDevices()
-        val speedKmh = loc?.speed?.times(3.6f)  // convert m/s → km/h
-
-        // Pass the 3 key signals to ActivityDetector for activity inference
-        val activity = activityDetector.infer(
-            speedKmh = speedKmh,
-            linearAccelMagnitude = magnitude(linearAccel),
-            bluetoothConnected = btDevices.isNotEmpty()
-        )
 
         return ContextPayload(
             device_id = fetchDeviceId(),
             timestamp = Instant.now().toString(),
-            inferred_activity = activity,
             location = loc?.let {
                 LocationData(
                     latitude = it.latitude,
@@ -263,8 +250,6 @@ class SensorCollectorService : Service(), SensorEventListener {
             else -> "SPEAKER"
         }
 
-        val battery_score = batteryDetector.detect(batteryLevel, chargeType)
-
         return DeviceState(
             screen_on = screen_on,
             battery_level = batteryLevel,
@@ -283,17 +268,7 @@ class SensorCollectorService : Service(), SensorEventListener {
             network_type = networkType,
             bluetooth_connected_devices = btDevices,
             foreground_app = getForegroundApp(),
-            ambient_noise_db = null,  // reserved for future mic-based measurement
-            battery_score = battery_score,
-            voice_confidence = voiceDetector.detectConfidence(
-                audio_output = audio_output,
-                headphones_connected = headphones_connected,
-                dnd_active = dnd_active,
-                screen_on = screen_on,
-                call_state = call_state,
-                activity = "STILL", // HARDCODED FOR TESTING
-                battery_score = battery_score
-            )
+            ambient_noise_db = null  // reserved for future mic-based measurement
         )
     }
 

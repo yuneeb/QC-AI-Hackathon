@@ -48,9 +48,7 @@ data class DeviceState(
     val network_type: String,       // "WIFI", "LTE", "5G", "3G", "NONE"
     val bluetooth_connected_devices: List<String>,
     val foreground_app: String?,
-    val ambient_noise_db: Float?,
-    val battery_score: Int,          // 1 (bad) to 5 (best)
-    val voice_confidence: Int        // 0 to 100
+    val ambient_noise_db: Float?
 )
 
 // Rule-based activity inference result
@@ -65,7 +63,6 @@ data class ContextPayload(
     val timestamp: String,
     val platform: String = "android",
     val collection_interval_ms: Long = 5000L,
-    val inferred_activity: InferredActivity,
     val location: LocationData?,
     val sensors: SensorData,
     val device_state: DeviceState
