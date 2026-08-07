@@ -3,6 +3,8 @@ import json
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from arduino.app_utils import App, Bridge
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Global variable to store the latest sensor data
 latest_telemetry = {
@@ -43,7 +45,7 @@ def sensor_polling_loop():
         latest_telemetry = {
             "temperature": temperature,
             "distance": distance,
-            "timestamp": date.now(),
+            "timestamp": datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M:%S"),
         }
         
     except Exception as e:
@@ -53,6 +55,7 @@ def sensor_polling_loop():
 def start_arduino_app():
     """Target function to run the Arduino App loop in a background thread."""
     print("Sensor collection starting...")
+    
     App.run(user_loop=sensor_polling_loop)
 
 if __name__ == "__main__":    
